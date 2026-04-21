@@ -1,0 +1,1840 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EPO Tracker — Partners Mortgage</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/11.0.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/11.0.2/firebase-database-compat.js"></script>
+<style>
+:root {
+  --pm-teal: #00818D;
+  --pm-teal-dark: #006670;
+  --pm-teal-light: #E8F3F4;
+  --pm-teal-pale: #F5FAFA;
+  --pm-gray: #8A7E78;
+  --pm-gray-light: #B8ADA7;
+  --pm-gray-pale: #F5F2F0;
+  --pm-gold: #FFAC27;
+  --pm-gold-pale: #FFF5E0;
+  --pm-bg: #FAFAF7;
+  --pm-text: #2C2927;
+  --pm-text-soft: #615B57;
+  --pm-border: #E5E0DC;
+  --pm-danger: #C44545;
+  --pm-danger-pale: #FBECEC;
+  --pm-success: #4A8659;
+  --pm-success-pale: #E8F3ED;
+  --pm-purple: #7D4A8F;
+  --pm-purple-pale: #F2E8F5;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.04);
+  --shadow-lg: 0 12px 32px rgba(0,0,0,0.10), 0 4px 8px rgba(0,0,0,0.05);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { min-height: 100%; }
+
+body {
+  font-family: 'Lora', Georgia, serif;
+  background: var(--pm-bg);
+  color: var(--pm-text);
+  line-height: 1.6;
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, h5, h6, .ui {
+  font-family: 'Montserrat', 'Gotham', -apple-system, sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  line-height: 1.25;
+}
+.ui { font-weight: 600; }
+a { color: var(--pm-teal); text-decoration: none; }
+a:hover { text-decoration: underline; }
+button { font-family: 'Montserrat', sans-serif; cursor: pointer; border: none; font-weight: 600; }
+
+/* ====== LAYOUT ====== */
+.wrap { max-width: 1200px; margin: 0 auto; padding: 32px 24px 80px; }
+.wrap-narrow { max-width: 820px; margin: 0 auto; padding: 32px 24px 80px; }
+
+/* ====== APP HEADER ====== */
+.app-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding-bottom: 28px; border-bottom: 1px solid var(--pm-border);
+  margin-bottom: 36px;
+}
+.app-header .brand { display: flex; align-items: center; gap: 14px; }
+.app-header .brand img { width: 48px; height: 48px; border-radius: 8px; display: block; }
+.app-header .brand-text h1 {
+  font-size: 18px; color: var(--pm-teal); letter-spacing: 0.08em;
+  text-transform: uppercase; line-height: 1.1;
+}
+.app-header .brand-text p {
+  font-family: 'Lora', serif; font-style: italic;
+  color: var(--pm-gray); font-size: 14px; margin-top: 2px;
+}
+.app-header .view-tag {
+  font-family: 'Montserrat', sans-serif; font-size: 11px;
+  letter-spacing: 0.15em; text-transform: uppercase;
+  color: var(--pm-gray); padding: 6px 12px;
+  border: 1px solid var(--pm-border); border-radius: 20px;
+}
+
+/* ====== ADMIN VIEW ====== */
+.fb-warning {
+  background: var(--pm-gold-pale); border: 1px solid var(--pm-gold);
+  border-radius: 10px; padding: 16px 20px; margin-bottom: 24px;
+  display: flex; gap: 14px; align-items: flex-start;
+}
+.fb-warning .icon {
+  font-size: 22px; line-height: 1; color: var(--pm-gold);
+  flex-shrink: 0; margin-top: 2px;
+}
+.fb-warning .content {
+  font-family: 'Lora', serif; font-size: 14px;
+  color: var(--pm-text); line-height: 1.6;
+}
+.fb-warning strong { font-family: 'Montserrat', sans-serif; font-weight: 700; }
+.fb-warning code {
+  background: rgba(0,0,0,0.05); padding: 2px 6px;
+  border-radius: 4px; font-size: 12px;
+}
+
+.admin-hero {
+  background: linear-gradient(135deg, var(--pm-teal) 0%, var(--pm-teal-dark) 100%);
+  color: #fff; border-radius: 14px; padding: 40px 44px;
+  margin-bottom: 32px; box-shadow: var(--shadow-md);
+  position: relative; overflow: hidden;
+  display: flex; justify-content: space-between; align-items: flex-end;
+  gap: 24px; flex-wrap: wrap;
+}
+.admin-hero::before {
+  content: ''; position: absolute; top: -60px; right: -60px;
+  width: 240px; height: 240px; border-radius: 50%;
+  background: rgba(255,255,255,0.06);
+}
+.admin-hero .hero-text { position: relative; flex: 1; min-width: 260px; }
+.admin-hero h2 { font-size: 28px; margin-bottom: 10px; }
+.admin-hero p {
+  font-family: 'Lora', serif; font-size: 16px; opacity: 0.92;
+  max-width: 640px;
+}
+.admin-hero .hero-actions { position: relative; display: flex; gap: 10px; flex-wrap: wrap; }
+
+.stats-row {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 16px; margin-bottom: 32px;
+}
+.stat-card {
+  background: #fff; border-radius: 10px; padding: 22px;
+  box-shadow: var(--shadow-sm); border-left: 3px solid var(--pm-teal);
+}
+.stat-card.gold { border-left-color: var(--pm-gold); }
+.stat-card.gray { border-left-color: var(--pm-gray); }
+.stat-card.dark { border-left-color: var(--pm-teal-dark); }
+.stat-card.success { border-left-color: var(--pm-success); }
+.stat-card .label {
+  font-family: 'Montserrat', sans-serif; font-size: 11px;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--pm-gray); font-weight: 600;
+}
+.stat-card .value {
+  font-family: 'Montserrat', sans-serif; font-size: 26px;
+  color: var(--pm-text); font-weight: 700; margin-top: 6px;
+}
+.stat-card .sublabel {
+  font-family: 'Lora', serif; font-size: 13px; font-style: italic;
+  color: var(--pm-gray); margin-top: 4px;
+}
+
+/* Filter tabs */
+.filter-bar {
+  display: flex; gap: 6px; margin-bottom: 22px; flex-wrap: wrap;
+  padding: 6px; background: #fff; border-radius: 10px;
+  box-shadow: var(--shadow-sm); width: fit-content;
+}
+.filter-tab {
+  padding: 8px 16px; border-radius: 7px; background: transparent;
+  font-family: 'Montserrat', sans-serif; font-size: 12px;
+  font-weight: 600; color: var(--pm-text-soft);
+  letter-spacing: 0.04em; transition: all 0.15s;
+  border: none; cursor: pointer;
+}
+.filter-tab:hover { background: var(--pm-gray-pale); color: var(--pm-text); }
+.filter-tab.active { background: var(--pm-teal); color: #fff; }
+.filter-tab .count {
+  display: inline-block; margin-left: 6px; padding: 1px 7px;
+  background: rgba(0,0,0,0.08); border-radius: 10px; font-size: 11px;
+}
+.filter-tab.active .count { background: rgba(255,255,255,0.25); }
+
+.section-title {
+  font-size: 20px; margin-bottom: 18px;
+  display: flex; align-items: center; gap: 12px;
+}
+.section-title::before {
+  content: ''; width: 4px; height: 22px; background: var(--pm-teal);
+  border-radius: 2px;
+}
+
+.epo-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 20px;
+}
+.epo-card {
+  background: #fff; border-radius: 12px; padding: 24px;
+  box-shadow: var(--shadow-sm); border: 1px solid var(--pm-border);
+  transition: all 0.2s ease;
+  display: flex; flex-direction: column;
+}
+.epo-card:hover {
+  box-shadow: var(--shadow-md); transform: translateY(-2px);
+  border-color: var(--pm-teal);
+}
+.epo-card .card-top {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  margin-bottom: 14px; gap: 10px;
+}
+.epo-card .loan-name {
+  font-family: 'Montserrat', sans-serif; font-size: 18px;
+  font-weight: 700; color: var(--pm-text);
+}
+.epo-card .loan-meta {
+  font-family: 'Lora', serif; font-size: 13px; font-style: italic;
+  color: var(--pm-gray); margin-top: 4px;
+}
+.epo-card .lo-row {
+  display: flex; align-items: center; gap: 8px;
+  padding: 12px 0; border-top: 1px solid var(--pm-border);
+  border-bottom: 1px solid var(--pm-border); margin: 14px 0;
+}
+.epo-card .lo-label {
+  font-family: 'Montserrat', sans-serif; font-size: 11px;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--pm-gray); font-weight: 600;
+}
+.epo-card .lo-name {
+  font-family: 'Montserrat', sans-serif; font-size: 14px;
+  font-weight: 600; color: var(--pm-teal);
+}
+.epo-card .amount-row {
+  display: flex; justify-content: space-between; align-items: baseline;
+  margin-bottom: 16px;
+}
+.epo-card .amount-label {
+  font-family: 'Montserrat', sans-serif; font-size: 11px;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--pm-gray); font-weight: 600;
+}
+.epo-card .amount-value {
+  font-family: 'Montserrat', sans-serif; font-size: 24px;
+  font-weight: 800; color: var(--pm-text);
+}
+.epo-card .card-actions {
+  display: flex; gap: 6px; flex-wrap: wrap;
+  margin-top: auto;
+}
+.epo-card .response-preview {
+  background: var(--pm-success-pale); border-left: 3px solid var(--pm-success);
+  padding: 10px 12px; border-radius: 0 6px 6px 0;
+  margin-bottom: 14px;
+  font-family: 'Lora', serif; font-size: 13px; color: var(--pm-text);
+}
+.epo-card .response-preview strong {
+  font-family: 'Montserrat', sans-serif; color: var(--pm-success);
+  font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;
+  display: block; margin-bottom: 3px;
+}
+
+/* Status pills */
+.status-pill {
+  font-family: 'Montserrat', sans-serif; font-size: 10px;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 4px 10px; border-radius: 20px; font-weight: 700;
+  white-space: nowrap; flex-shrink: 0;
+}
+.status-pill.pending { background: var(--pm-gold-pale); color: #B8810F; }
+.status-pill.acknowledged { background: var(--pm-teal-pale); color: var(--pm-teal-dark); }
+.status-pill.in_progress { background: var(--pm-purple-pale); color: var(--pm-purple); }
+.status-pill.paid { background: var(--pm-success-pale); color: var(--pm-success); }
+.status-pill.archived { background: var(--pm-gray-pale); color: var(--pm-gray); }
+
+/* Empty state */
+.empty-state {
+  background: #fff; border-radius: 12px; padding: 60px 40px;
+  text-align: center; box-shadow: var(--shadow-sm);
+  border: 2px dashed var(--pm-border);
+}
+.empty-state h3 {
+  font-family: 'Montserrat', sans-serif; color: var(--pm-gray);
+  font-size: 18px; margin-bottom: 8px;
+}
+.empty-state p {
+  font-family: 'Lora', serif; font-style: italic;
+  color: var(--pm-gray); font-size: 14px;
+}
+
+/* ====== BUTTONS ====== */
+.btn {
+  font-family: 'Montserrat', sans-serif;
+  padding: 10px 20px; border-radius: 8px; font-size: 13px;
+  font-weight: 600; letter-spacing: 0.03em;
+  transition: all 0.15s ease; cursor: pointer;
+  display: inline-flex; align-items: center; gap: 6px;
+  white-space: nowrap;
+}
+.btn-primary { background: var(--pm-teal); color: #fff; }
+.btn-primary:hover { background: var(--pm-teal-dark); }
+.btn-secondary {
+  background: #fff; color: var(--pm-teal);
+  border: 1.5px solid var(--pm-teal);
+}
+.btn-secondary:hover { background: var(--pm-teal-pale); }
+.btn-ghost {
+  background: transparent; color: var(--pm-gray);
+  border: 1px solid var(--pm-border);
+}
+.btn-ghost:hover { background: var(--pm-gray-pale); color: var(--pm-text); }
+.btn-danger {
+  background: #fff; color: var(--pm-danger);
+  border: 1.5px solid var(--pm-danger);
+}
+.btn-danger:hover { background: var(--pm-danger-pale); }
+.btn-gold {
+  background: var(--pm-gold); color: var(--pm-text);
+}
+.btn-gold:hover { background: #E89B1E; }
+.btn-success {
+  background: var(--pm-success); color: #fff;
+}
+.btn-success:hover { background: #3A6D47; }
+.btn-lg { padding: 14px 28px; font-size: 14px; }
+.btn-sm { padding: 6px 12px; font-size: 12px; }
+.btn-xs { padding: 4px 9px; font-size: 11px; }
+.btn-block { width: 100%; justify-content: center; }
+
+/* ====== LO VIEW ====== */
+.lo-hero {
+  background: linear-gradient(135deg, var(--pm-teal) 0%, var(--pm-teal-dark) 100%);
+  color: #fff; border-radius: 14px 14px 0 0;
+  padding: 48px 56px 40px; position: relative; overflow: hidden;
+}
+.lo-hero::before {
+  content: ''; position: absolute; top: -100px; right: -100px;
+  width: 360px; height: 360px; border-radius: 50%;
+  background: rgba(255,255,255,0.05);
+}
+.lo-hero .kicker {
+  font-family: 'Montserrat', sans-serif; font-size: 12px;
+  letter-spacing: 0.2em; text-transform: uppercase;
+  color: rgba(255,255,255,0.75); margin-bottom: 14px;
+  position: relative;
+}
+.lo-hero h1 {
+  font-family: 'Lora', serif; font-weight: 500;
+  font-size: 38px; line-height: 1.1; margin-bottom: 16px;
+  position: relative; font-style: italic;
+}
+.lo-hero .hero-sub {
+  font-family: 'Lora', serif; font-size: 17px;
+  opacity: 0.92; max-width: 560px; position: relative;
+}
+.lo-body {
+  background: #fff; border-radius: 0 0 14px 14px;
+  padding: 48px 56px; box-shadow: var(--shadow-md);
+  border: 1px solid var(--pm-border); border-top: none;
+}
+.lo-greeting {
+  font-family: 'Lora', serif; font-size: 16px; line-height: 1.75;
+  color: var(--pm-text); padding: 24px 28px;
+  background: var(--pm-teal-pale); border-left: 3px solid var(--pm-teal);
+  border-radius: 0 8px 8px 0; margin-bottom: 40px;
+}
+.lo-greeting strong { color: var(--pm-teal-dark); }
+
+.amount-box {
+  background: linear-gradient(180deg, #FFFFFF 0%, var(--pm-gray-pale) 100%);
+  border: 1px solid var(--pm-border);
+  border-radius: 12px; padding: 36px 40px;
+  margin-bottom: 36px; text-align: center;
+  position: relative;
+}
+.amount-box::before, .amount-box::after {
+  content: ''; position: absolute; top: 0; bottom: 0; width: 3px;
+  background: var(--pm-gold);
+}
+.amount-box::before { left: 0; border-radius: 12px 0 0 12px; }
+.amount-box::after { right: 0; border-radius: 0 12px 12px 0; }
+.amount-box .eyebrow {
+  font-family: 'Montserrat', sans-serif; font-size: 11px;
+  letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--pm-gray); font-weight: 600; margin-bottom: 8px;
+}
+.amount-box .big-amount {
+  font-family: 'Montserrat', sans-serif; font-size: 52px;
+  font-weight: 800; color: var(--pm-text); line-height: 1;
+  margin-bottom: 12px;
+}
+.amount-box .amount-caption {
+  font-family: 'Lora', serif; font-style: italic;
+  color: var(--pm-gray); font-size: 14px;
+}
+
+.loan-ref {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 1px; background: var(--pm-border);
+  border-radius: 10px; overflow: hidden; margin-bottom: 44px;
+  border: 1px solid var(--pm-border);
+}
+.loan-ref .cell { background: #fff; padding: 18px 22px; }
+.loan-ref .cell-label {
+  font-family: 'Montserrat', sans-serif; font-size: 10px;
+  letter-spacing: 0.15em; text-transform: uppercase;
+  color: var(--pm-gray); font-weight: 600; margin-bottom: 6px;
+}
+.loan-ref .cell-value {
+  font-family: 'Montserrat', sans-serif; font-size: 15px;
+  font-weight: 600; color: var(--pm-text);
+}
+
+.lo-section {
+  padding-top: 40px; margin-top: 40px;
+  border-top: 1px solid var(--pm-border);
+}
+.lo-section:first-of-type { border-top: none; padding-top: 0; margin-top: 0; }
+.lo-section h2 {
+  font-size: 22px; color: var(--pm-teal-dark);
+  margin-bottom: 8px;
+}
+.lo-section .section-sub {
+  font-family: 'Lora', serif; font-style: italic;
+  color: var(--pm-gray); font-size: 15px; margin-bottom: 24px;
+}
+
+.info-panel {
+  background: var(--pm-gray-pale); border-radius: 10px;
+  padding: 24px 28px; margin-bottom: 24px;
+}
+.info-panel p {
+  font-family: 'Lora', serif; font-size: 15px; line-height: 1.7;
+  color: var(--pm-text-soft); margin-bottom: 12px;
+}
+.info-panel p:last-child { margin-bottom: 0; }
+.info-panel strong { color: var(--pm-text); }
+
+/* Form fields */
+.field { margin-bottom: 20px; }
+.field label {
+  display: block; font-family: 'Montserrat', sans-serif;
+  font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--pm-text-soft); font-weight: 600; margin-bottom: 8px;
+}
+.field label .req { color: var(--pm-danger); margin-left: 2px; }
+.field input[type="text"],
+.field input[type="email"],
+.field input[type="number"],
+.field input[type="date"],
+.field textarea,
+.field select {
+  width: 100%; padding: 12px 14px;
+  font-family: 'Lora', serif; font-size: 15px;
+  border: 1.5px solid var(--pm-border); border-radius: 8px;
+  background: #fff; color: var(--pm-text); transition: border-color 0.15s;
+}
+.field input:focus, .field textarea:focus, .field select:focus {
+  outline: none; border-color: var(--pm-teal);
+  box-shadow: 0 0 0 3px rgba(0,129,141,0.12);
+}
+.field textarea { min-height: 120px; resize: vertical; font-family: 'Lora', serif; }
+.field .hint {
+  font-family: 'Lora', serif; font-size: 13px; font-style: italic;
+  color: var(--pm-gray); margin-top: 4px;
+}
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.field-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+
+/* Acknowledgment box */
+.ack-box {
+  background: var(--pm-teal-pale); border: 1.5px solid var(--pm-teal);
+  border-radius: 10px; padding: 22px 26px;
+  display: flex; gap: 16px; align-items: flex-start;
+}
+.ack-box input[type="checkbox"] {
+  width: 22px; height: 22px; margin-top: 2px;
+  accent-color: var(--pm-teal); cursor: pointer; flex-shrink: 0;
+}
+.ack-box label {
+  font-family: 'Lora', serif; font-size: 15px;
+  line-height: 1.65; color: var(--pm-text); cursor: pointer;
+}
+.ack-box label strong { color: var(--pm-teal-dark); }
+
+/* Plan options */
+.plan-options {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px; margin-bottom: 24px;
+}
+.plan-option {
+  background: #fff; border: 1.5px solid var(--pm-border);
+  border-radius: 10px; padding: 16px 14px; text-align: center;
+  cursor: pointer; transition: all 0.15s;
+}
+.plan-option:hover { border-color: var(--pm-teal); }
+.plan-option.selected {
+  border-color: var(--pm-teal); background: var(--pm-teal-pale);
+  box-shadow: 0 0 0 3px rgba(0,129,141,0.12);
+}
+.plan-option .count {
+  font-family: 'Montserrat', sans-serif; font-size: 22px;
+  font-weight: 800; color: var(--pm-teal); line-height: 1;
+  margin-bottom: 4px;
+}
+.plan-option .count-label {
+  font-family: 'Montserrat', sans-serif; font-size: 10px;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--pm-gray); font-weight: 600;
+}
+.plan-option .per-check {
+  font-family: 'Lora', serif; font-size: 13px; font-style: italic;
+  color: var(--pm-text-soft); margin-top: 8px;
+}
+.plan-option.custom .count { font-size: 14px; letter-spacing: 0.05em; }
+.plan-summary {
+  background: var(--pm-gold-pale);
+  border-left: 3px solid var(--pm-gold);
+  padding: 18px 22px; border-radius: 0 8px 8px 0;
+  margin-top: 16px; font-family: 'Lora', serif; font-size: 15px;
+  color: var(--pm-text);
+}
+.plan-summary strong { color: #8B5D0A; }
+.custom-schedule { display: none; margin-top: 16px; }
+.custom-schedule.active { display: block; }
+
+.submit-bar {
+  margin-top: 48px; padding-top: 32px;
+  border-top: 2px solid var(--pm-border);
+  display: flex; justify-content: space-between; align-items: center;
+  gap: 20px; flex-wrap: wrap;
+}
+.submit-bar .privacy-note {
+  font-family: 'Lora', serif; font-style: italic;
+  color: var(--pm-gray); font-size: 13px; max-width: 380px;
+}
+
+.pm-footer {
+  text-align: center; margin-top: 48px;
+  color: var(--pm-gray); font-size: 13px;
+}
+.pm-footer .tagline {
+  font-family: 'Lora', serif; font-style: italic;
+  color: var(--pm-teal); font-size: 16px; margin-bottom: 6px;
+}
+
+/* ====== MODALS ====== */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+  display: none; align-items: center; justify-content: center;
+  z-index: 100; padding: 20px;
+}
+.modal-overlay.active { display: flex; }
+.modal {
+  background: #fff; border-radius: 12px; padding: 32px;
+  max-width: 640px; width: 100%; box-shadow: var(--shadow-lg);
+  max-height: 90vh; overflow-y: auto;
+}
+.modal-wide { max-width: 820px; }
+.modal h3 { font-size: 20px; color: var(--pm-teal); margin-bottom: 8px; }
+.modal > p {
+  font-family: 'Lora', serif; color: var(--pm-text-soft);
+  margin-bottom: 24px; font-size: 14px;
+}
+.share-section {
+  margin-bottom: 22px; padding-bottom: 22px;
+  border-bottom: 1px solid var(--pm-border);
+}
+.share-section:last-of-type { border-bottom: none; padding-bottom: 0; }
+.share-label {
+  font-family: 'Montserrat', sans-serif; font-size: 11px;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--pm-gray); font-weight: 600; margin-bottom: 8px;
+}
+.modal .link-box {
+  background: var(--pm-gray-pale); padding: 12px 14px;
+  border-radius: 8px; font-family: monospace; font-size: 13px;
+  word-break: break-all; margin-bottom: 10px;
+  border: 1px solid var(--pm-border); color: var(--pm-text);
+}
+.subject-box {
+  background: #fff; border: 1.5px solid var(--pm-border);
+  border-radius: 8px; padding: 10px 14px;
+  font-family: 'Montserrat', sans-serif; font-size: 14px;
+  font-weight: 500; margin-bottom: 10px; color: var(--pm-text);
+  width: 100%;
+}
+.subject-box:focus { outline: none; border-color: var(--pm-teal); }
+.email-body {
+  width: 100%; padding: 14px 16px;
+  font-family: 'Lora', serif; font-size: 14px; line-height: 1.7;
+  border: 1.5px solid var(--pm-border); border-radius: 8px;
+  background: #fff; color: var(--pm-text);
+  min-height: 260px; resize: vertical; margin-bottom: 10px;
+}
+.email-body:focus { outline: none; border-color: var(--pm-teal); }
+.copy-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.modal-actions {
+  display: flex; gap: 10px; justify-content: flex-end; margin-top: 24px;
+  padding-top: 20px; border-top: 1px solid var(--pm-border);
+}
+
+/* Response viewer */
+.response-block {
+  background: var(--pm-gray-pale); border-radius: 10px;
+  padding: 20px; margin-bottom: 16px;
+}
+.response-block .rb-label {
+  font-family: 'Montserrat', sans-serif; font-size: 10px;
+  letter-spacing: 0.15em; text-transform: uppercase;
+  color: var(--pm-gray); font-weight: 700; margin-bottom: 6px;
+}
+.response-block .rb-value {
+  font-family: 'Lora', serif; font-size: 15px; color: var(--pm-text);
+  line-height: 1.6;
+}
+.response-block .rb-value.mono { font-family: 'Montserrat', sans-serif; font-weight: 600; }
+
+.response-meta {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+  margin-bottom: 16px;
+}
+
+/* Confirmation view */
+.confirmation {
+  text-align: center; padding: 60px 40px;
+  background: #fff; border-radius: 14px;
+  box-shadow: var(--shadow-md);
+}
+.confirmation .check-icon {
+  width: 72px; height: 72px; background: var(--pm-success);
+  border-radius: 50%; margin: 0 auto 24px;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-size: 40px;
+}
+.confirmation h2 { font-size: 28px; color: var(--pm-teal-dark); margin-bottom: 12px; }
+.confirmation p {
+  font-family: 'Lora', serif; color: var(--pm-text-soft);
+  font-size: 16px; max-width: 440px; margin: 0 auto 28px;
+}
+
+/* Toast */
+.toast {
+  position: fixed; bottom: 24px; right: 24px; z-index: 200;
+  background: var(--pm-text); color: #fff;
+  padding: 14px 20px; border-radius: 10px;
+  font-family: 'Montserrat', sans-serif; font-size: 14px;
+  box-shadow: var(--shadow-lg);
+  opacity: 0; transform: translateY(10px);
+  transition: all 0.25s ease; pointer-events: none;
+  max-width: 360px;
+}
+.toast.show { opacity: 1; transform: translateY(0); }
+.toast.success { background: var(--pm-success); }
+.toast.error { background: var(--pm-danger); }
+
+/* Print */
+@media print {
+  body { background: #fff; }
+  .no-print { display: none !important; }
+  .lo-hero { break-after: avoid; }
+  .lo-section { break-inside: avoid; }
+}
+
+/* Responsive */
+@media (max-width: 760px) {
+  .wrap, .wrap-narrow { padding: 20px 16px 60px; }
+  .lo-hero { padding: 32px 28px; }
+  .lo-hero h1 { font-size: 28px; }
+  .lo-body { padding: 32px 28px; }
+  .amount-box .big-amount { font-size: 40px; }
+  .amount-box { padding: 28px 24px; }
+  .stats-row { grid-template-columns: repeat(2, 1fr); }
+  .loan-ref { grid-template-columns: 1fr; }
+  .field-row, .field-row-3 { grid-template-columns: 1fr; }
+  .app-header { flex-direction: column; align-items: flex-start; gap: 14px; }
+  .admin-hero { padding: 28px 24px; flex-direction: column; align-items: flex-start; }
+  .admin-hero h2 { font-size: 22px; }
+  .response-meta { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- ============ ADMIN VIEW ============ -->
+<div id="adminView" class="wrap" style="display:none;">
+  <header class="app-header">
+    <div class="brand">
+      <img id="adminLogo" alt="Partners Mortgage">
+      <div class="brand-text">
+        <h1>EPO Tracker</h1>
+        <p>Partners Mortgage</p>
+      </div>
+    </div>
+    <div class="view-tag">Admin View</div>
+  </header>
+
+  <div id="fbWarning" class="fb-warning" style="display:none;">
+    <div class="icon">&#9888;</div>
+    <div class="content">
+      <strong>Firebase not configured.</strong> The tool is running in local demo mode, so any EPOs you add and any LO responses will reset on page reload. To enable persistent tracking, paste your Firebase <code>apiKey</code> and <code>databaseURL</code> into the <code>FIREBASE_CONFIG</code> block near the top of the script section, then set <code>FIREBASE_ENABLED = true</code>. Same setup you used for the Leadership Goal Tracker.
+    </div>
+  </div>
+
+  <div class="admin-hero">
+    <div class="hero-text">
+      <h2>Early Payoff Charge Dashboard</h2>
+      <p>Track every EPO from delivery through acknowledgment to payoff. Each loan is handled individually, and the loan officer sees only their own notification.</p>
+    </div>
+    <div class="hero-actions">
+      <button class="btn btn-gold" onclick="showAddEpoForm()">+ New EPO</button>
+    </div>
+  </div>
+
+  <div class="stats-row" id="statsRow"></div>
+
+  <h2 class="section-title ui">EPO List</h2>
+  <div class="filter-bar" id="filterBar"></div>
+  <div class="epo-grid" id="epoGrid"></div>
+</div>
+
+<!-- ============ LO VIEW ============ -->
+<div id="loView" class="wrap-narrow" style="display:none;">
+  <header class="app-header no-print">
+    <div class="brand">
+      <img id="loLogo" alt="Partners Mortgage">
+      <div class="brand-text">
+        <h1>Partners Mortgage</h1>
+        <p>You matter.</p>
+      </div>
+    </div>
+    <div class="view-tag">Confidential &mdash; Personal</div>
+  </header>
+
+  <div class="lo-hero">
+    <div class="kicker">Early Payoff Notification</div>
+    <h1 id="heroLine">A loan you originated paid off early.</h1>
+    <p class="hero-sub">Here&rsquo;s what this means for you, the amount involved, and how we can put a plan in place together.</p>
+  </div>
+
+  <div class="lo-body">
+    <div class="lo-greeting" id="greetingBlock"></div>
+
+    <div class="amount-box">
+      <div class="eyebrow">Amount Due From You</div>
+      <div class="big-amount" id="amountOwed">$0.00</div>
+      <div class="amount-caption">Your portion of the early payoff chargeback on this loan.</div>
+    </div>
+
+    <div class="loan-ref" id="loanRef"></div>
+
+    <section class="lo-section">
+      <h2>What is an EPO charge?</h2>
+      <p class="section-sub">Plain-English context, so you know exactly what this is.</p>
+      <div class="info-panel">
+        <p>An <strong>Early Payoff (EPO)</strong> occurs when a loan is paid off or refinanced within a short window after closing &mdash; usually inside the first 4 to 6 months. When that happens, the investor recaptures the premium they paid us at funding because they didn&rsquo;t earn the interest they expected.</p>
+        <p>Because your commission was paid out of that same premium at closing, the company is required to recover a portion of it when the premium is clawed back. This is industry-standard practice across every lender &mdash; it is <strong>not</strong> a penalty, and it does not reflect on your performance.</p>
+        <p>The amount shown above is strictly <strong>your share</strong> of the chargeback on this specific loan. No other deductions, overhead, or unrelated costs are included.</p>
+        <p style="margin-top:14px; padding-top:14px; border-top:1px solid rgba(0,0,0,0.08);"><strong>One more thing you should know:</strong> before this notice reached you, we went back to the lender and pushed for every concession available, leaning on long-standing relationships and our track record wherever we could. The figure above reflects the lowest number we were able to negotiate. It is not a first-ask amount; it is the best outcome we could achieve on your behalf.</p>
+      </div>
+    </section>
+
+    <section class="lo-section">
+      <h2>Acknowledgment</h2>
+      <p class="section-sub">Please confirm you&rsquo;ve reviewed the information above.</p>
+      <div class="ack-box">
+        <input type="checkbox" id="ackCheck">
+        <label for="ackCheck">
+          <strong>I acknowledge</strong> that I&rsquo;ve received and reviewed this Early Payoff notification. I understand the amount shown represents my portion of the chargeback on this loan and will be recovered from future commissions per the repayment plan below.
+        </label>
+      </div>
+      <div class="field-row" style="margin-top:20px;">
+        <div class="field">
+          <label>Your Full Name <span class="req">*</span></label>
+          <input type="text" id="loFullName" placeholder="Type your name as signature">
+        </div>
+        <div class="field">
+          <label>Date</label>
+          <input type="text" id="loSignDate" readonly>
+        </div>
+      </div>
+    </section>
+
+    <section class="lo-section">
+      <h2>Questions or Comments</h2>
+      <p class="section-sub">Anything you&rsquo;d like to discuss? Add it here and it will come directly to Leif.</p>
+      <div class="field">
+        <textarea id="loQuestions" placeholder="Optional. Questions about the calculation, the loan file, or anything else you&rsquo;d like addressed."></textarea>
+      </div>
+    </section>
+
+    <section class="lo-section">
+      <h2>Your Repayment Plan <span class="req" style="color:var(--pm-danger);">*</span></h2>
+      <p class="section-sub">Choose how you&rsquo;d like this recovered from future commissions. Each EPO is handled on its own schedule.</p>
+
+      <div class="plan-options" id="planOptions"></div>
+
+      <div id="planSummary" class="plan-summary" style="display:none;"></div>
+
+      <div class="custom-schedule" id="customSchedule">
+        <div class="field-row">
+          <div class="field">
+            <label>Amount per commission</label>
+            <input type="number" id="customAmount" placeholder="e.g., 750" min="0" step="50">
+          </div>
+          <div class="field">
+            <label>Frequency</label>
+            <select id="customFreq">
+              <option value="each">Each closing commission</option>
+              <option value="monthly">Monthly (all closings combined)</option>
+              <option value="other">Other &mdash; describe in notes</option>
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label>Additional notes on your proposed plan</label>
+          <textarea id="customNotes" placeholder="Optional context. For example, pipeline expectations, hardship considerations, or timing."></textarea>
+        </div>
+      </div>
+    </section>
+
+    <div class="submit-bar no-print">
+      <div class="privacy-note">
+        Your acknowledgment, questions, and plan selection will be saved and sent to Leif Boyd for review and confirmation.
+      </div>
+      <div style="display:flex; gap:10px;">
+        <button class="btn btn-ghost" onclick="window.print()">Print / Save PDF</button>
+        <button class="btn btn-primary btn-lg" id="submitBtn">Submit Acknowledgment &amp; Plan</button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="pm-footer">
+    <div class="tagline">You matter.</div>
+    <div>Partners Mortgage &middot; 1687 Eureka Road, Suite 100, Roseville, CA 95661</div>
+  </footer>
+</div>
+
+<!-- ============ CONFIRMATION VIEW ============ -->
+<div id="confirmView" class="wrap-narrow" style="display:none;">
+  <header class="app-header no-print">
+    <div class="brand">
+      <img id="confirmLogo" alt="Partners Mortgage">
+      <div class="brand-text">
+        <h1>Partners Mortgage</h1>
+        <p>You matter.</p>
+      </div>
+    </div>
+  </header>
+  <div class="confirmation">
+    <div class="check-icon">&#10003;</div>
+    <h2>Thank you. We&rsquo;ve got it.</h2>
+    <p id="confirmCopy">Your acknowledgment and repayment plan have been saved and sent to Leif. You&rsquo;ll hear back shortly with confirmation of the schedule.</p>
+    <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
+      <button class="btn btn-primary" id="notifyEmailBtn">Also Email Leif</button>
+      <button class="btn btn-secondary" onclick="window.print()">Print Summary</button>
+    </div>
+    <div id="summaryPrintout" style="margin-top:48px; text-align:left;"></div>
+  </div>
+  <footer class="pm-footer">
+    <div class="tagline">You matter.</div>
+  </footer>
+</div>
+
+<!-- ============ MODALS ============ -->
+
+<!-- Share modal -->
+<div class="modal-overlay" id="shareModal">
+  <div class="modal">
+    <h3>Share this EPO notification</h3>
+    <p>Copy the link and/or the ready-to-send email below. You can edit the email before copying if you want to tailor it.</p>
+    <div class="share-section">
+      <div class="share-label">Notification Link</div>
+      <div class="link-box" id="shareLink"></div>
+      <div class="copy-row">
+        <button class="btn btn-sm btn-secondary" id="copyLinkBtn">Copy Link</button>
+      </div>
+    </div>
+    <div class="share-section">
+      <div class="share-label">Email Subject</div>
+      <input type="text" class="subject-box" id="shareSubject">
+      <div class="copy-row" style="margin-bottom:16px;">
+        <button class="btn btn-sm btn-secondary" id="copySubjectBtn">Copy Subject</button>
+      </div>
+      <div class="share-label">Email Body</div>
+      <textarea class="email-body" id="shareBody"></textarea>
+      <div class="copy-row">
+        <button class="btn btn-sm btn-secondary" id="copyBodyBtn">Copy Body</button>
+        <button class="btn btn-sm btn-primary" id="copyEmailBtn">Copy Subject + Body</button>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('shareModal')">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add/Edit EPO modal -->
+<div class="modal-overlay" id="epoFormModal">
+  <div class="modal modal-wide">
+    <h3 id="epoFormTitle">Add New EPO</h3>
+    <p>Enter the loan and chargeback details. The loan officer will only see the amount they owe and the loan reference information.</p>
+
+    <input type="hidden" id="editingEpoId">
+
+    <div class="field-row">
+      <div class="field">
+        <label>Loan Officer Name <span class="req">*</span></label>
+        <input type="text" id="f_loName" placeholder="e.g., Katie Pastor-Trinidad">
+        <div class="hint">Short/display name used on the card.</div>
+      </div>
+      <div class="field">
+        <label>LO First Name</label>
+        <input type="text" id="f_loFirstName" placeholder="e.g., Katie">
+        <div class="hint">Used in the email greeting. Auto-derived if blank.</div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Full Display Name</label>
+      <input type="text" id="f_loNameFull" placeholder="e.g., Katie Pastor-Trinidad, or for pairs: Lanny Setka & Derek Sepulveda">
+      <div class="hint">Shown on the admin card. Auto-filled from LO Name if blank.</div>
+    </div>
+
+    <div class="field-row-3">
+      <div class="field">
+        <label>Borrower Last Name <span class="req">*</span></label>
+        <input type="text" id="f_borrower" placeholder="e.g., Russo">
+      </div>
+      <div class="field">
+        <label>Loan Number</label>
+        <input type="text" id="f_loanNumber" placeholder="e.g., 14146442">
+      </div>
+      <div class="field">
+        <label>Investor</label>
+        <input type="text" id="f_investor" placeholder="e.g., FCM, TLS" value="FCM">
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Funded Date</label>
+      <input type="text" id="f_fundedDate" placeholder="e.g., May 2, 2025">
+      <div class="hint">Free-form text. Use a readable format.</div>
+    </div>
+
+    <div class="field-row">
+      <div class="field">
+        <label>Amount Owed by LO <span class="req">*</span></label>
+        <input type="number" id="f_amountOwed" placeholder="0.00" min="0" step="0.01">
+        <div class="hint">LO&rsquo;s portion of the chargeback.</div>
+      </div>
+      <div class="field">
+        <label>Total EPO Fee</label>
+        <input type="number" id="f_totalEpoFee" placeholder="0.00" min="0" step="0.01">
+        <div class="hint">Full chargeback (company + LO). Admin-only reference.</div>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-danger" id="epoDeleteBtn" style="margin-right:auto; display:none;" onclick="confirmDeleteEpo()">Delete</button>
+      <button class="btn btn-ghost" onclick="closeModal('epoFormModal')">Cancel</button>
+      <button class="btn btn-primary" id="epoFormSubmitBtn" onclick="submitEpoForm()">Save EPO</button>
+    </div>
+  </div>
+</div>
+
+<!-- Response viewer modal -->
+<div class="modal-overlay" id="responseModal">
+  <div class="modal modal-wide">
+    <h3 id="respModalTitle">LO Response</h3>
+    <p id="respModalSubtitle"></p>
+    <div id="respModalContent"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('responseModal')">Close</button>
+      <button class="btn btn-secondary" id="respStatusBtn" onclick="cycleStatus()">Mark In Progress</button>
+      <button class="btn btn-success" id="respPaidBtn" onclick="markPaid()">Mark Paid in Full</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ============================================================
+// CONFIGURATION
+// ============================================================
+const LEIF_EMAIL = 'lboyd@partnersmortgage.com';
+
+// ------- Firebase Configuration -------
+// Setup:
+//   1. Go to console.firebase.google.com -> create/select project
+//   2. Build -> Realtime Database -> Create (test mode)
+//   3. Project Settings (gear icon) -> Your apps -> Web app
+//   4. Copy the apiKey and databaseURL into the values below
+//   5. Set FIREBASE_ENABLED to true
+//   6. Rules (Rules tab): { ".read": true, ".write": true }
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyAILCXCoc4anVIiBOOqkUgWi7bth7PbHVU",
+  authDomain: "early-pay-off.firebaseapp.com",
+  databaseURL: "https://early-pay-off-default-rtdb.firebaseio.com",
+  projectId: "early-pay-off",
+  storageBucket: "early-pay-off.firebasestorage.app",
+  messagingSenderId: "665314500249",
+  appId: "1:665314500249:web:d0d71178e89c89ce1ce208",
+  measurementId: "G-B7TBH2BDC3"
+};
+const FIREBASE_ENABLED = true; // Set to true once FIREBASE_CONFIG is filled in
+
+const LOGO_DATA_URI = 'data:image/jpeg;base64,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';
+
+// ============================================================
+// SEED DATA (used on first run or in local mode)
+// ============================================================
+const DEFAULT_EPOS = [
+  {
+    id: 'russo',
+    loName: 'Lanny Setka',
+    loNameFull: 'Lanny Setka & Derek Sepulveda',
+    loFirstName: 'Lanny',
+    borrower: 'Russo',
+    loanNumber: '14146442',
+    investor: 'FCM',
+    fundedDate: 'May 2, 2025',
+    amountOwed: 5568.08,
+    totalEpoFee: 8566.27,
+    status: 'pending',
+    createdAt: new Date().toISOString()
+  },
+  {
+    id: 'maher',
+    loName: 'Katie Pastor-Trinidad',
+    loNameFull: 'Katie Pastor-Trinidad',
+    loFirstName: 'Katie',
+    borrower: 'Maher',
+    loanNumber: '5017771',
+    investor: 'FCM',
+    fundedDate: 'Funding date TBD',
+    amountOwed: 9456.40,
+    totalEpoFee: 14548.30,
+    status: 'pending',
+    createdAt: new Date().toISOString()
+  },
+  {
+    id: 'frande',
+    loName: 'Katie Pastor-Trinidad',
+    loNameFull: 'Katie Pastor-Trinidad',
+    loFirstName: 'Katie',
+    borrower: 'Frande',
+    loanNumber: '15676976',
+    investor: 'FCM',
+    fundedDate: 'February 4, 2026',
+    amountOwed: 4295.30,
+    totalEpoFee: 6608.16,
+    status: 'pending',
+    createdAt: new Date().toISOString()
+  },
+  {
+    id: 'cheshire',
+    loName: 'Katie Pastor-Trinidad',
+    loNameFull: 'Katie Pastor-Trinidad',
+    loFirstName: 'Katie',
+    borrower: 'Cheshire-Glick',
+    loanNumber: '15099587',
+    investor: 'TLS',
+    fundedDate: 'October 20, 2025',
+    amountOwed: 3965.00,
+    totalEpoFee: 6100.00,
+    status: 'pending',
+    createdAt: new Date().toISOString()
+  }
+];
+
+// ============================================================
+// STATUS DEFINITIONS
+// ============================================================
+const STATUSES = {
+  pending: { label: 'Pending', description: 'Awaiting LO response' },
+  acknowledged: { label: 'Acknowledged', description: 'LO submitted plan' },
+  in_progress: { label: 'In Progress', description: 'Repayment active' },
+  paid: { label: 'Paid in Full', description: 'Fully recovered' },
+  archived: { label: 'Archived', description: 'Hidden from main views' }
+};
+
+// ============================================================
+// STATE
+// ============================================================
+let EPOS = {};             // keyed by id
+let db = null;             // firebase.database() reference
+let dbReady = false;
+let currentEpo = null;     // LO view current EPO
+let selectedPlan = null;   // LO view plan selection
+let currentFilter = 'active'; // 'active' | 'pending' | 'acknowledged' | 'paid' | 'archived' | 'all'
+let currentResponseEpoId = null; // for the response modal
+
+// ============================================================
+// UTILITIES
+// ============================================================
+const $ = (id) => document.getElementById(id);
+const fmtMoney = (n) => '$' + (Number(n) || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const getParam = (key) => new URLSearchParams(window.location.search).get(key);
+const genId = () => 'epo_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 6);
+const escapeHtml = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const today = () => new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+
+function toast(msg, type = '') {
+  const t = $('toast');
+  t.textContent = msg;
+  t.className = 'toast show ' + type;
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+function openModal(id) { $(id).classList.add('active'); }
+function closeModal(id) { $(id).classList.remove('active'); }
+
+// ============================================================
+// FIREBASE LAYER
+// ============================================================
+async function initFirebase() {
+  if (!FIREBASE_ENABLED) return false;
+  if (!FIREBASE_CONFIG.apiKey || FIREBASE_CONFIG.apiKey.includes('PASTE_YOUR')) return false;
+  if (!FIREBASE_CONFIG.databaseURL || FIREBASE_CONFIG.databaseURL.includes('YOUR-PROJECT')) return false;
+
+  // SDK load check: if the firebase global isn't defined, the CDN scripts never arrived.
+  if (typeof firebase === 'undefined' || !firebase.initializeApp) {
+    console.error(
+      'Firebase SDK did not load from gstatic.com. ' +
+      'Common causes: an ad blocker, a corporate network blocking gstatic.com, ' +
+      'or a browser extension intercepting the request. ' +
+      'Check the Network tab for failed requests to firebase-app-compat.js or firebase-database-compat.js.'
+    );
+    return false;
+  }
+
+  try {
+    firebase.initializeApp(FIREBASE_CONFIG);
+    db = firebase.database();
+    dbReady = true;
+    return true;
+  } catch (e) {
+    console.error('Firebase init failed:', e);
+    return false;
+  }
+}
+
+async function loadAllEPOs() {
+  if (!db) {
+    EPOS = {};
+    DEFAULT_EPOS.forEach(e => { EPOS[e.id] = { ...e }; });
+    return;
+  }
+  try {
+    const snap = await db.ref('epos').once('value');
+    const data = snap.val();
+    if (!data) {
+      // Seed Firebase with defaults on first run
+      for (const e of DEFAULT_EPOS) {
+        await db.ref('epos/' + e.id).set(e);
+      }
+      EPOS = {};
+      DEFAULT_EPOS.forEach(e => { EPOS[e.id] = { ...e }; });
+    } else {
+      EPOS = data;
+    }
+  } catch (e) {
+    console.error('Load failed, falling back to defaults:', e);
+    EPOS = {};
+    DEFAULT_EPOS.forEach(e => { EPOS[e.id] = { ...e }; });
+  }
+}
+
+async function saveEPORecord(epo) {
+  EPOS[epo.id] = epo;
+  if (db) await db.ref('epos/' + epo.id).set(epo);
+}
+
+async function deleteEPORecord(id) {
+  delete EPOS[id];
+  if (db) await db.ref('epos/' + id).remove();
+}
+
+async function updateEPOStatus(id, status) {
+  if (!EPOS[id]) return;
+  EPOS[id].status = status;
+  if (db) await db.ref('epos/' + id + '/status').set(status);
+}
+
+async function saveResponseRecord(id, response) {
+  if (!EPOS[id]) return;
+  EPOS[id].response = response;
+  EPOS[id].status = 'acknowledged';
+  if (db) {
+    await db.ref('epos/' + id + '/response').set(response);
+    await db.ref('epos/' + id + '/status').set('acknowledged');
+  }
+}
+
+// ============================================================
+// ROUTER
+// ============================================================
+async function route() {
+  ['adminLogo','loLogo','confirmLogo'].forEach(id => {
+    const el = $(id); if (el) el.src = LOGO_DATA_URI;
+  });
+
+  await initFirebase();
+  await loadAllEPOs();
+
+  const epoId = getParam('epo');
+  if (epoId && EPOS[epoId]) {
+    renderLO(EPOS[epoId]);
+  } else if (epoId) {
+    // Invalid EPO id; fallback to admin
+    renderAdmin();
+    toast('EPO not found. Showing dashboard.', 'error');
+  } else {
+    renderAdmin();
+  }
+}
+
+// ============================================================
+// ADMIN VIEW
+// ============================================================
+function renderAdmin() {
+  $('adminView').style.display = 'block';
+  $('fbWarning').style.display = dbReady ? 'none' : 'flex';
+  renderStats();
+  renderFilterBar();
+  renderEpoList();
+}
+
+function allEpos() { return Object.values(EPOS); }
+function activeEpos() { return allEpos().filter(e => e.status !== 'archived' && e.status !== 'paid'); }
+
+function getFilteredEpos() {
+  const list = allEpos();
+  let filtered;
+  if (currentFilter === 'all') filtered = list;
+  else if (currentFilter === 'active') filtered = list.filter(e => e.status !== 'archived' && e.status !== 'paid');
+  else filtered = list.filter(e => e.status === currentFilter);
+  // Sort: newest first by createdAt
+  return filtered.sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
+}
+
+function renderStats() {
+  const all = allEpos();
+  const active = activeEpos();
+  const acknowledged = all.filter(e => e.status === 'acknowledged' || e.status === 'in_progress');
+  const paid = all.filter(e => e.status === 'paid');
+
+  const totalActiveOwed = active.reduce((s, e) => s + (Number(e.amountOwed) || 0), 0);
+  const totalRecovered = paid.reduce((s, e) => s + (Number(e.amountOwed) || 0), 0);
+  const uniqueLOs = new Set(active.map(e => e.loName));
+
+  $('statsRow').innerHTML = `
+    <div class="stat-card">
+      <div class="label">Active EPOs</div>
+      <div class="value">${active.length}</div>
+      <div class="sublabel">Across ${uniqueLOs.size} loan officer${uniqueLOs.size === 1 ? '' : 's'}</div>
+    </div>
+    <div class="stat-card gold">
+      <div class="label">Outstanding Balance</div>
+      <div class="value">${fmtMoney(totalActiveOwed)}</div>
+      <div class="sublabel">Sum of active EPOs</div>
+    </div>
+    <div class="stat-card dark">
+      <div class="label">Pending Acknowledgment</div>
+      <div class="value">${all.filter(e => e.status === 'pending').length}</div>
+      <div class="sublabel">Awaiting LO response</div>
+    </div>
+    <div class="stat-card success">
+      <div class="label">Recovered to Date</div>
+      <div class="value">${fmtMoney(totalRecovered)}</div>
+      <div class="sublabel">${paid.length} EPO${paid.length === 1 ? '' : 's'} closed</div>
+    </div>
+  `;
+}
+
+function renderFilterBar() {
+  const all = allEpos();
+  const counts = {
+    active: all.filter(e => e.status !== 'archived' && e.status !== 'paid').length,
+    pending: all.filter(e => e.status === 'pending').length,
+    acknowledged: all.filter(e => e.status === 'acknowledged' || e.status === 'in_progress').length,
+    paid: all.filter(e => e.status === 'paid').length,
+    archived: all.filter(e => e.status === 'archived').length,
+    all: all.length
+  };
+  const tabs = [
+    { id: 'active', label: 'Active' },
+    { id: 'pending', label: 'Pending' },
+    { id: 'acknowledged', label: 'Acknowledged' },
+    { id: 'paid', label: 'Paid' },
+    { id: 'archived', label: 'Archived' },
+    { id: 'all', label: 'All' }
+  ];
+  $('filterBar').innerHTML = tabs.map(t => `
+    <button class="filter-tab ${currentFilter === t.id ? 'active' : ''}" onclick="setFilter('${t.id}')">
+      ${t.label}<span class="count">${counts[t.id]}</span>
+    </button>
+  `).join('');
+}
+
+function setFilter(f) {
+  currentFilter = f;
+  renderFilterBar();
+  renderEpoList();
+}
+
+function renderEpoList() {
+  const epos = getFilteredEpos();
+  if (epos.length === 0) {
+    $('epoGrid').innerHTML = `
+      <div class="empty-state" style="grid-column: 1/-1;">
+        <h3>No EPOs in this view</h3>
+        <p>${currentFilter === 'all' ? 'Click "New EPO" to add your first record.' : 'Try switching to a different filter tab.'}</p>
+      </div>
+    `;
+    return;
+  }
+  $('epoGrid').innerHTML = epos.map(e => renderEpoCard(e)).join('');
+}
+
+function renderEpoCard(e) {
+  const status = STATUSES[e.status] || STATUSES.pending;
+  const hasResponse = e.response && e.response.signedBy;
+  const responsePreview = hasResponse ? `
+    <div class="response-preview">
+      <strong>Response received</strong>
+      Signed by ${escapeHtml(e.response.signedBy)} on ${escapeHtml(e.response.signedDate || '')}.
+      ${e.response.planDescription ? '<br>Plan: ' + escapeHtml(e.response.planDescription.split('\n')[0]) : ''}
+    </div>` : '';
+
+  return `
+    <div class="epo-card">
+      <div class="card-top">
+        <div>
+          <div class="loan-name">${escapeHtml(e.borrower)}</div>
+          <div class="loan-meta">${escapeHtml(e.investor || '')} ${e.loanNumber ? '&middot; Loan #' + escapeHtml(e.loanNumber) : ''}</div>
+        </div>
+        <span class="status-pill ${e.status}">${status.label}</span>
+      </div>
+      <div class="lo-row">
+        <div style="flex:1;">
+          <div class="lo-label">Loan Officer</div>
+          <div class="lo-name">${escapeHtml(e.loNameFull || e.loName)}</div>
+        </div>
+        <div>
+          <div class="lo-label">Funded</div>
+          <div class="lo-name" style="color:var(--pm-gray); font-size:13px;">${escapeHtml(e.fundedDate || 'n/a')}</div>
+        </div>
+      </div>
+      <div class="amount-row">
+        <div class="amount-label">LO Owes</div>
+        <div class="amount-value">${fmtMoney(e.amountOwed)}</div>
+      </div>
+      ${responsePreview}
+      <div class="card-actions">
+        <button class="btn btn-xs btn-secondary" onclick="openEpo('${e.id}')">Preview</button>
+        <button class="btn btn-xs btn-ghost" onclick="openShareModal('${e.id}')">Share Link</button>
+        ${hasResponse ? `<button class="btn btn-xs btn-primary" onclick="showResponseDetails('${e.id}')">View Response</button>` : ''}
+        <button class="btn btn-xs btn-ghost" onclick="showEditEpoForm('${e.id}')">Edit</button>
+      </div>
+    </div>
+  `;
+}
+
+function openEpo(id) {
+  window.location.search = '?epo=' + id;
+}
+
+// ============================================================
+// ADD/EDIT EPO FORM
+// ============================================================
+function resetEpoForm() {
+  ['f_loName','f_loFirstName','f_loNameFull','f_borrower','f_loanNumber','f_fundedDate','f_amountOwed','f_totalEpoFee'].forEach(id => $(id).value = '');
+  $('f_investor').value = 'FCM';
+  $('editingEpoId').value = '';
+  $('epoDeleteBtn').style.display = 'none';
+}
+
+function populateEpoForm(e) {
+  $('f_loName').value = e.loName || '';
+  $('f_loFirstName').value = e.loFirstName || '';
+  $('f_loNameFull').value = e.loNameFull || '';
+  $('f_borrower').value = e.borrower || '';
+  $('f_loanNumber').value = e.loanNumber || '';
+  $('f_investor').value = e.investor || '';
+  $('f_fundedDate').value = e.fundedDate || '';
+  $('f_amountOwed').value = e.amountOwed || '';
+  $('f_totalEpoFee').value = e.totalEpoFee || '';
+}
+
+function showAddEpoForm() {
+  resetEpoForm();
+  $('epoFormTitle').textContent = 'Add New EPO';
+  $('epoFormSubmitBtn').textContent = 'Save EPO';
+  openModal('epoFormModal');
+  setTimeout(() => $('f_loName').focus(), 100);
+}
+
+function showEditEpoForm(id) {
+  const e = EPOS[id];
+  if (!e) return;
+  resetEpoForm();
+  $('epoFormTitle').textContent = 'Edit EPO — ' + e.borrower;
+  $('epoFormSubmitBtn').textContent = 'Save Changes';
+  $('editingEpoId').value = id;
+  $('epoDeleteBtn').style.display = 'inline-flex';
+  populateEpoForm(e);
+  openModal('epoFormModal');
+}
+
+async function submitEpoForm() {
+  const editingId = $('editingEpoId').value;
+  const loName = $('f_loName').value.trim();
+  const borrower = $('f_borrower').value.trim();
+  const amountOwed = parseFloat($('f_amountOwed').value);
+
+  if (!loName) { toast('Loan Officer name is required.', 'error'); $('f_loName').focus(); return; }
+  if (!borrower) { toast('Borrower name is required.', 'error'); $('f_borrower').focus(); return; }
+  if (!amountOwed || amountOwed <= 0) { toast('Amount Owed is required and must be greater than 0.', 'error'); $('f_amountOwed').focus(); return; }
+
+  const id = editingId || genId();
+  const existing = EPOS[id] || {};
+
+  const epo = {
+    id: id,
+    loName: loName,
+    loNameFull: $('f_loNameFull').value.trim() || loName,
+    loFirstName: $('f_loFirstName').value.trim() || loName.split(' ')[0],
+    borrower: borrower,
+    loanNumber: $('f_loanNumber').value.trim(),
+    investor: $('f_investor').value.trim() || 'FCM',
+    fundedDate: $('f_fundedDate').value.trim(),
+    amountOwed: amountOwed,
+    totalEpoFee: parseFloat($('f_totalEpoFee').value) || 0,
+    status: existing.status || 'pending',
+    createdAt: existing.createdAt || new Date().toISOString(),
+    response: existing.response || null
+  };
+
+  try {
+    await saveEPORecord(epo);
+    closeModal('epoFormModal');
+    renderAdmin();
+    toast(editingId ? 'EPO updated.' : 'EPO added.', 'success');
+  } catch (err) {
+    console.error(err);
+    toast('Save failed. Check the console for details.', 'error');
+  }
+}
+
+async function confirmDeleteEpo() {
+  const id = $('editingEpoId').value;
+  if (!id) return;
+  const e = EPOS[id];
+  if (!confirm(`Delete the EPO for ${e.borrower} (${e.loNameFull})? This cannot be undone. If there is already an LO response, consider archiving instead.`)) return;
+  try {
+    await deleteEPORecord(id);
+    closeModal('epoFormModal');
+    renderAdmin();
+    toast('EPO deleted.', 'success');
+  } catch (err) {
+    console.error(err);
+    toast('Delete failed.', 'error');
+  }
+}
+
+// ============================================================
+// SHARE MODAL
+// ============================================================
+function buildShareEmailSubject(epo) {
+  return `Quick check-in on the ${epo.borrower} loan`;
+}
+
+function buildShareEmailBody(epo, url) {
+  return [
+    `Hi ${epo.loFirstName},`,
+    ``,
+    `Hope you're doing well. I need to loop you in on something we've got to work through together.`,
+    ``,
+    `One of your recently funded loans, the ${epo.borrower} file, paid off inside the lender's EPO window. That means a chargeback is coming back to us from the investor, and a portion of the commission paid at funding has to be recovered. Before anything reached you, we went back to the lender and pushed for every concession available, leaning on relationships wherever we could, so the amount you'll see is already the lowest we could negotiate.`,
+    ``,
+    `I put together a quick page that walks through the details, the exact amount, what this is (and isn't), and a few repayment options so you can pick what fits best:`,
+    ``,
+    url,
+    ``,
+    `Take a look when you get a chance, acknowledge it, and select your preferred plan. If anything is unclear or you'd rather talk it through, drop your questions right in the form or reach out to me directly. We'll figure this out together.`,
+    ``,
+    `Thanks,`,
+    `Leif`
+  ].join('\n');
+}
+
+function flashCopied(btn, originalText) {
+  btn.textContent = 'Copied!';
+  setTimeout(() => btn.textContent = originalText, 1500);
+}
+
+function copyText(text, btn, originalText) {
+  navigator.clipboard.writeText(text).then(() => flashCopied(btn, originalText));
+}
+
+function openShareModal(id) {
+  const epo = EPOS[id];
+  if (!epo) return;
+  const url = window.location.origin + window.location.pathname + '?epo=' + id;
+  $('shareLink').textContent = url;
+  $('shareSubject').value = buildShareEmailSubject(epo);
+  $('shareBody').value = buildShareEmailBody(epo, url);
+  openModal('shareModal');
+  $('copyLinkBtn').onclick = () => copyText(url, $('copyLinkBtn'), 'Copy Link');
+  $('copySubjectBtn').onclick = () => copyText($('shareSubject').value, $('copySubjectBtn'), 'Copy Subject');
+  $('copyBodyBtn').onclick = () => copyText($('shareBody').value, $('copyBodyBtn'), 'Copy Body');
+  $('copyEmailBtn').onclick = () => {
+    const combined = `Subject: ${$('shareSubject').value}\n\n${$('shareBody').value}`;
+    copyText(combined, $('copyEmailBtn'), 'Copy Subject + Body');
+  };
+}
+
+// ============================================================
+// RESPONSE VIEWER
+// ============================================================
+function showResponseDetails(id) {
+  const e = EPOS[id];
+  if (!e || !e.response) return;
+  currentResponseEpoId = id;
+
+  $('respModalTitle').textContent = `${e.borrower} — ${e.loNameFull}`;
+  $('respModalSubtitle').textContent = `Status: ${STATUSES[e.status]?.label || e.status} · Amount: ${fmtMoney(e.amountOwed)}`;
+
+  const r = e.response;
+  const customBits = r.customAmount || r.customNotes ? `
+    <div class="response-block">
+      <div class="rb-label">Custom Plan Details</div>
+      <div class="rb-value">
+        ${r.customAmount ? `<div><strong>Amount per deduction:</strong> ${fmtMoney(r.customAmount)}</div>` : ''}
+        ${r.customFrequency ? `<div><strong>Frequency:</strong> ${escapeHtml(r.customFrequency)}</div>` : ''}
+        ${r.customNotes ? `<div style="margin-top:8px;">${escapeHtml(r.customNotes)}</div>` : ''}
+      </div>
+    </div>` : '';
+
+  $('respModalContent').innerHTML = `
+    <div class="response-meta">
+      <div class="response-block">
+        <div class="rb-label">Signed By</div>
+        <div class="rb-value mono">${escapeHtml(r.signedBy || '')}</div>
+      </div>
+      <div class="response-block">
+        <div class="rb-label">Date Signed</div>
+        <div class="rb-value mono">${escapeHtml(r.signedDate || '')}</div>
+      </div>
+    </div>
+
+    <div class="response-block">
+      <div class="rb-label">Repayment Plan</div>
+      <div class="rb-value" style="white-space:pre-line;">${escapeHtml(r.planDescription || 'Not specified')}</div>
+    </div>
+
+    ${customBits}
+
+    <div class="response-block">
+      <div class="rb-label">Questions / Comments</div>
+      <div class="rb-value">${r.questions ? escapeHtml(r.questions) : '<em style="color:var(--pm-gray);">(None)</em>'}</div>
+    </div>
+  `;
+
+  // Status button label depends on current status
+  const statusBtn = $('respStatusBtn');
+  const paidBtn = $('respPaidBtn');
+  if (e.status === 'acknowledged') {
+    statusBtn.textContent = 'Mark In Progress';
+    statusBtn.style.display = 'inline-flex';
+    paidBtn.style.display = 'inline-flex';
+  } else if (e.status === 'in_progress') {
+    statusBtn.textContent = 'Move to Acknowledged';
+    statusBtn.style.display = 'inline-flex';
+    paidBtn.style.display = 'inline-flex';
+  } else if (e.status === 'paid') {
+    statusBtn.textContent = 'Reopen (Move to Active)';
+    statusBtn.style.display = 'inline-flex';
+    paidBtn.style.display = 'none';
+  } else {
+    statusBtn.style.display = 'none';
+    paidBtn.style.display = 'none';
+  }
+
+  openModal('responseModal');
+}
+
+async function cycleStatus() {
+  const id = currentResponseEpoId;
+  if (!id) return;
+  const e = EPOS[id];
+  const map = {
+    acknowledged: 'in_progress',
+    in_progress: 'acknowledged',
+    paid: 'acknowledged'
+  };
+  const next = map[e.status] || 'acknowledged';
+  try {
+    await updateEPOStatus(id, next);
+    closeModal('responseModal');
+    renderAdmin();
+    toast('Status updated to ' + STATUSES[next].label + '.', 'success');
+  } catch (err) {
+    toast('Update failed.', 'error');
+  }
+}
+
+async function markPaid() {
+  const id = currentResponseEpoId;
+  if (!id) return;
+  const e = EPOS[id];
+  if (!confirm(`Mark the ${e.borrower} EPO as PAID IN FULL? This will move it to the Paid tab and count the amount as recovered.`)) return;
+  try {
+    await updateEPOStatus(id, 'paid');
+    closeModal('responseModal');
+    renderAdmin();
+    toast('Marked as paid in full.', 'success');
+  } catch (err) {
+    toast('Update failed.', 'error');
+  }
+}
+
+// ============================================================
+// LO VIEW
+// ============================================================
+function renderLO(epo) {
+  currentEpo = epo;
+  $('loView').style.display = 'block';
+
+  $('heroLine').textContent = `${epo.loFirstName}, one of your loans paid off early.`;
+
+  $('greetingBlock').innerHTML = `
+    <strong>Hi ${escapeHtml(epo.loFirstName)},</strong><br><br>
+    One of the loans you originated, the ${escapeHtml(epo.borrower)} file, paid off inside the lender&rsquo;s EPO window, which means a portion of the commission paid to you at funding needs to be recovered. I wanted to deliver this to you directly, clearly, and with a plan attached so there are no surprises. Take a look below, flag any questions, and pick the repayment pace that works for you.
+  `;
+
+  $('amountOwed').textContent = fmtMoney(epo.amountOwed);
+
+  $('loanRef').innerHTML = `
+    <div class="cell">
+      <div class="cell-label">Borrower</div>
+      <div class="cell-value">${escapeHtml(epo.borrower)}</div>
+    </div>
+    <div class="cell">
+      <div class="cell-label">Loan Number</div>
+      <div class="cell-value">${escapeHtml(epo.loanNumber || 'n/a')}</div>
+    </div>
+    <div class="cell">
+      <div class="cell-label">Funded</div>
+      <div class="cell-value">${escapeHtml(epo.fundedDate || 'n/a')}</div>
+    </div>
+  `;
+
+  $('loSignDate').value = today();
+  renderPlanOptions();
+  $('submitBtn').onclick = submitLOForm;
+
+  // Pre-fill if this LO has already responded (rare but possible)
+  if (epo.response && epo.response.signedBy) {
+    $('loFullName').value = epo.response.signedBy;
+    $('ackCheck').checked = true;
+    $('loQuestions').value = epo.response.questions || '';
+    if (epo.response.planType && epo.response.planType !== 'custom') {
+      selectPlan(parseInt(epo.response.planType, 10));
+    } else if (epo.response.planType === 'custom') {
+      selectPlan('custom');
+      $('customAmount').value = epo.response.customAmount || '';
+      $('customFreq').value = epo.response.customFrequency || 'each';
+      $('customNotes').value = epo.response.customNotes || '';
+    }
+  }
+}
+
+function renderPlanOptions() {
+  const opts = [1, 2, 3, 4, 6];
+  const amount = currentEpo.amountOwed;
+  const html = opts.map(n => `
+    <div class="plan-option" data-count="${n}" onclick="selectPlan(${n})">
+      <div class="count">${n}</div>
+      <div class="count-label">${n === 1 ? 'Commission' : 'Commissions'}</div>
+      <div class="per-check">${fmtMoney(amount / n)}/ea</div>
+    </div>
+  `).join('') + `
+    <div class="plan-option custom" data-count="custom" onclick="selectPlan('custom')">
+      <div class="count">Custom</div>
+      <div class="count-label">Your Proposal</div>
+      <div class="per-check">Define below</div>
+    </div>
+  `;
+  $('planOptions').innerHTML = html;
+}
+
+function selectPlan(n) {
+  selectedPlan = n;
+  document.querySelectorAll('.plan-option').forEach(el => {
+    el.classList.toggle('selected', el.dataset.count == String(n));
+  });
+  const summary = $('planSummary');
+  const custom = $('customSchedule');
+  if (n === 'custom') {
+    custom.classList.add('active');
+    summary.style.display = 'none';
+  } else {
+    custom.classList.remove('active');
+    const per = currentEpo.amountOwed / n;
+    summary.style.display = 'block';
+    summary.innerHTML = n === 1
+      ? `<strong>Selected plan:</strong> Full balance of <strong>${fmtMoney(currentEpo.amountOwed)}</strong> deducted from your next closing commission.`
+      : `<strong>Selected plan:</strong> <strong>${fmtMoney(per)}</strong> deducted from each of your next <strong>${n}</strong> closing commissions, totaling <strong>${fmtMoney(currentEpo.amountOwed)}</strong>.`;
+  }
+}
+
+function buildLOSubmission() {
+  const name = $('loFullName').value.trim();
+  const ack = $('ackCheck').checked;
+  const date = $('loSignDate').value;
+  const questions = $('loQuestions').value.trim();
+
+  let planText = '';
+  let planType = String(selectedPlan);
+  let customAmount = '';
+  let customFreq = '';
+  let customNotes = '';
+
+  if (selectedPlan === 'custom') {
+    customAmount = $('customAmount').value;
+    customFreq = $('customFreq').options[$('customFreq').selectedIndex].text;
+    customNotes = $('customNotes').value.trim();
+    planText = `Custom Plan Proposed\n  Amount per deduction: ${customAmount ? '$' + customAmount : '(not specified)'}\n  Frequency: ${customFreq}\n  Notes: ${customNotes || '(none)'}`;
+  } else if (selectedPlan) {
+    const per = currentEpo.amountOwed / selectedPlan;
+    planText = selectedPlan === 1
+      ? `Pay in full from next closing commission: ${fmtMoney(currentEpo.amountOwed)}`
+      : `Split over ${selectedPlan} commissions at ${fmtMoney(per)} each (total: ${fmtMoney(currentEpo.amountOwed)})`;
+  }
+  return { name, ack, date, questions, planText, planType, customAmount, customFreq, customNotes };
+}
+
+function validateLO(s) {
+  if (!s.ack) { alert('Please check the acknowledgment box to confirm you have reviewed this notification.'); return false; }
+  if (!s.name) { alert('Please type your full name as signature.'); return false; }
+  if (!selectedPlan) { alert('Please select a repayment plan option.'); return false; }
+  if (selectedPlan === 'custom' && !$('customAmount').value) {
+    if (!confirm('You selected a custom plan but did not enter an amount per deduction. Submit anyway?')) return false;
+  }
+  return true;
+}
+
+function buildLOEmailBody(s) {
+  const e = currentEpo;
+  return [
+    `Leif,`,
+    ``,
+    `This is my acknowledgment and proposed repayment plan for the EPO on the ${e.borrower} loan.`,
+    ``,
+    `EPO DETAILS`,
+    `  Borrower: ${e.borrower}`,
+    `  Loan Number: ${e.loanNumber}`,
+    `  Investor: ${e.investor}`,
+    `  Funded: ${e.fundedDate}`,
+    `  Amount due from me: ${fmtMoney(e.amountOwed)}`,
+    ``,
+    `ACKNOWLEDGMENT`,
+    `  Acknowledged: Yes`,
+    `  Signed by: ${s.name}`,
+    `  Date: ${s.date}`,
+    ``,
+    `REPAYMENT PLAN`,
+    `  ${s.planText}`,
+    ``,
+    `QUESTIONS / COMMENTS`,
+    `  ${s.questions || '(none)'}`,
+    ``,
+    `Thanks,`,
+    `${s.name}`
+  ].join('\n');
+}
+
+function sendLOEmail(s) {
+  const subject = `EPO Acknowledgment: ${currentEpo.borrower} (${fmtMoney(currentEpo.amountOwed)})`;
+  const body = buildLOEmailBody(s);
+  const mailto = `mailto:${LEIF_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  window.location.href = mailto;
+}
+
+async function submitLOForm() {
+  const s = buildLOSubmission();
+  if (!validateLO(s)) return;
+
+  const response = {
+    signedBy: s.name,
+    signedAt: new Date().toISOString(),
+    signedDate: s.date,
+    ackChecked: true,
+    planType: s.planType,
+    planDescription: s.planText,
+    questions: s.questions || '',
+    customAmount: s.customAmount || '',
+    customFrequency: s.customFreq || '',
+    customNotes: s.customNotes || ''
+  };
+
+  try {
+    await saveResponseRecord(currentEpo.id, response);
+  } catch (err) {
+    console.error('Response save failed:', err);
+  }
+
+  $('loView').style.display = 'none';
+  $('confirmView').style.display = 'block';
+
+  const e = currentEpo;
+  $('summaryPrintout').innerHTML = `
+    <div style="background:#fff; border:1px solid var(--pm-border); border-radius:10px; padding:28px;">
+      <h3 style="font-family:'Montserrat', sans-serif; color:var(--pm-teal); margin-bottom:16px;">Your Submission Summary</h3>
+      <div style="margin-bottom:14px;"><strong>Loan:</strong> ${escapeHtml(e.borrower)} (#${escapeHtml(e.loanNumber)})</div>
+      <div style="margin-bottom:14px;"><strong>Amount due:</strong> ${fmtMoney(e.amountOwed)}</div>
+      <div style="margin-bottom:14px;"><strong>Signed by:</strong> ${escapeHtml(s.name)} on ${escapeHtml(s.date)}</div>
+      <div style="margin-bottom:14px;"><strong>Plan:</strong><br><span style="white-space:pre-line;">${escapeHtml(s.planText)}</span></div>
+      ${s.questions ? `<div style="margin-bottom:14px;"><strong>Questions:</strong><br>${escapeHtml(s.questions)}</div>` : ''}
+    </div>
+  `;
+
+  // Update confirmation message based on save success
+  if (!dbReady) {
+    $('confirmCopy').textContent = 'Your submission is ready. Because tracking storage isn\u2019t configured yet, please click "Also Email Leif" below to make sure it reaches him.';
+  }
+
+  $('notifyEmailBtn').onclick = () => sendLOEmail(s);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ============================================================
+// INIT
+// ============================================================
+// Wait until all external scripts (Firebase SDK) have finished loading
+// or definitively failed, then run the app. This avoids race conditions
+// where route() runs before firebase-*-compat.js has arrived.
+if (document.readyState === 'complete') {
+  route();
+} else {
+  window.addEventListener('load', route);
+}
+</script>
+
+</body>
+</html>
